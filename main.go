@@ -20,5 +20,6 @@ func main() {
 	web.AddFuncMap("fav", func(input string) string {
 		return fmt.Sprintf("Favorite ID: %s", input)
 	})
+	
 	web.Run()
 }

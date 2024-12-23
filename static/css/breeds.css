@@ -15,6 +15,9 @@ body {
     background-color: transparent;
     font-size: 16px;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
   
   .nav-btn.active {

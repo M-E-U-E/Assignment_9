@@ -1,0 +1,71 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.nav-btn {
+  background-color: transparent;
+  font-size: 16px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nav-btn.active {
+  color: red;
+  font-weight: bold;
+}
+
+.icon-style {
+  font-size: 24px;
+  margin-bottom: -4px; /* Adjusts alignment for stacked icons */
+}
+
+.v-img {
+  border-radius: 8px;
+}
+
+.fav-btn, .upvote-btn, .downvote-btn {
+  margin: 10px;
+}
+
+.fav-btn:hover, .upvote-btn:hover, .downvote-btn:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.image-container {
+  margin: 20px auto;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 20px;
+}
+
+.fav-img {
+  border-radius: 10px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 15px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.fav-img:hover {
+  transform: scale(1.05);
+}
+
+p {
+  text-align: center;
+  color: gray;
+  font-size: 18px;
+}

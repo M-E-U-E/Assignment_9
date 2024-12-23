@@ -8,11 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/favs.css?v={{ .UnixTimestamp }}">
-
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="/static/js/favs.js?v={{ .UnixTimestamp }}"></script>
+    <script src="/static/js/favs.js?v=1.0"></script>
   </head>
   <body>
     <div id="app">
@@ -25,41 +24,44 @@
                 <v-btn @click="navigateTo('/voting')" class="nav-btn">
                   <v-icon class="icon-style">mdi-arrow-up</v-icon>
                   <v-icon class="icon-style">mdi-arrow-down</v-icon>
-                  <span>Voting</span>
+                  Voting
                 </v-btn>
                 <v-btn @click="navigateTo('/breeds')" class="nav-btn">
-                  <v-icon left>mdi-magnify</v-icon> Breeds
+                  <v-icon>mdi-magnify</v-icon> Breeds
                 </v-btn>
                 <v-btn @click="navigateTo('/favs')" class="nav-btn active">
-                  <v-icon left>mdi-heart</v-icon> Favs
+                  <v-icon>mdi-heart</v-icon> Favs
                 </v-btn>
               </v-col>
             </v-row>
 
-            <!-- Toggle View -->
-            <v-row justify="center" class="mt-2">
-              <v-btn @click="toggleView('grid')" class="nav-btn">
-                <v-icon>mdi-view-grid</v-icon>
-              </v-btn>
-              <v-btn @click="toggleView('list')" class="nav-btn">
-                <v-icon>mdi-view-list</v-icon>
-              </v-btn>
+            <!-- Favorites Gallery -->
+            <v-row justify="center" class="mt-4">
+              <v-col cols="12" md="6">
+                <div v-if="favourites.length > 0">
+                  <v-row>
+                    <v-col cols="12" md="4" v-for="(favorite, index) in favourites" :key="favorite.id">
+                      <v-img :src="favorite.image.url" class="fav-img"></v-img>
+                    </v-col>
+                  </v-row>
+                </div>
+                <p v-else><h1>Loading...</h1></p>
+              </v-col>
             </v-row>
 
-            <!-- Favorites Display -->
-            <v-row justify="center" class="mt-2" :class="{ 'grid-view': view === 'grid', 'list-view': view === 'list' }">
-              <v-col cols="12" md="4" lg="3" v-for="(fav, index) in favorites" :key="index">
-                <v-card>
-                  <v-img :src="fav.url" height="200px"></v-img>
-                  <v-card-text>
-                    <p>Favorite ID: {{ fav.id }}</p>
-                  </v-card-text>
-                </v-card>
-              </v-col>
+            <!-- Pagination Controls -->
+            <v-row justify="center" class="mt-4">
+              <v-pagination
+                v-if="pagination_count > limit"
+                v-model="page"
+                :length="Math.ceil(pagination_count / limit)"
+                @input="changePage"
+              ></v-pagination>
             </v-row>
           </v-container>
         </v-content>
       </v-app>
     </div>
+    <script src="/static/js/favs.js?v={{ .UnixTimestamp }}"></script>
   </body>
 </html>
