@@ -23,4 +23,6 @@ func init() {
 	beego.Router("/api/favorites", &controllers.FavsController{}, "get:Get")
 	beego.Router("/api/favorites", &controllers.FavsController{}, "post:Post")
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/api/config/api_key", &controllers.ConfigController{}, "get:GetAPIKey")
+
 }

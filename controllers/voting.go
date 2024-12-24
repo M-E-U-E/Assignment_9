@@ -20,48 +20,75 @@ type VotingCat struct {
 
 // Fetches random cat images and renders the voting page
 func (c *VotingController) Get() {
-	apiKey := "live_G9HhPFIdEQOKjegSsyNOQ8lRoWxFkzxttwXgu7F0gCFLhYVlX0F1cIVGMADW6rtg"
-	url := "https://api.thecatapi.com/v1/images/search?limit=1"
-
-	// Create a request to fetch cat image
-	req, err := http.NewRequest("GET", url, nil)
+	// Fetch the API key and base URL from the app configuration
+	apiKey, err := web.AppConfig.String("api_key")
 	if err != nil {
-		c.Data["json"] = map[string]string{"error": "Failed to create request"}
+		c.Data["json"] = map[string]string{"error": "Failed to fetch API key from configuration"}
 		c.ServeJSON()
 		return
 	}
-	req.Header.Add("x-api-key", apiKey)
 
-	// Perform the request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	apiBaseURL, err := web.AppConfig.String("api_base_url")
 	if err != nil {
-		c.Data["json"] = map[string]string{"error": "Failed to fetch data"}
-		c.ServeJSON()
-		return
-	}
-	defer resp.Body.Close()
-
-	// Read and parse the response
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		c.Data["json"] = map[string]string{"error": "Failed to read response"}
+		c.Data["json"] = map[string]string{"error": "Failed to fetch API base URL from configuration"}
 		c.ServeJSON()
 		return
 	}
 
-	var cats []VotingCat
-	if err := json.Unmarshal(body, &cats); err != nil {
-		c.Data["json"] = map[string]string{"error": "Failed to parse response"}
+	// Create a channel to receive the API response
+	catChan := make(chan []VotingCat)
+	errChan := make(chan error)
+
+	// Fetch random cat image in a separate goroutine
+	go func() {
+		url := apiBaseURL + "/images/search?limit=1"
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		req.Header.Add("x-api-key", apiKey)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		var cats []VotingCat
+		if err := json.Unmarshal(body, &cats); err != nil {
+			errChan <- err
+			return
+		}
+
+		catChan <- cats
+	}()
+
+	// Wait for the response or error
+	select {
+	case cats := <-catChan:
+		// Check if any cat data was returned
+		if len(cats) > 0 {
+			c.Data["CatImageURL"] = cats[0].URL
+		} else {
+			c.Data["CatImageURL"] = "/static/images/cat-placeholder.jpg" // Fallback image
+		}
+	case err := <-errChan:
+		c.Data["json"] = map[string]string{"error": "Failed to fetch data: " + err.Error()}
 		c.ServeJSON()
 		return
-	}
-
-	// Check if any cat data was returned
-	if len(cats) > 0 {
-		c.Data["CatImageURL"] = cats[0].URL
-	} else {
-		c.Data["CatImageURL"] = "/static/images/cat-placeholder.jpg" // Fallback image
+	case <-time.After(5 * time.Second): // Timeout after 5 seconds
+		c.Data["json"] = map[string]string{"error": "Request timed out"}
+		c.ServeJSON()
+		return
 	}
 
 	// Render the voting page

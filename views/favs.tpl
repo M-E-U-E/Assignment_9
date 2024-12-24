@@ -1,3 +1,4 @@
+<!-- Template (index.tpl) -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="/static/js/favs.js?v=1.0"></script>
   </head>
   <body>
     <div id="app">
@@ -35,29 +35,30 @@
               </v-col>
             </v-row>
 
-            <!-- Favorites Gallery -->
+            <!-- View Toggle Buttons -->
             <v-row justify="center" class="mt-4">
-              <v-col cols="12" md="6">
-                <div v-if="favourites.length > 0">
-                  <v-row>
-                    <v-col cols="12" md="4" v-for="(favorite, index) in favourites" :key="favorite.id">
-                      <v-img :src="favorite.image.url" class="fav-img"></v-img>
-                    </v-col>
-                  </v-row>
-                </div>
-                <p v-else><h1>Loading...</h1></p>
+              <v-col cols="12" md="6" class="view-toggle-container">
+                <v-btn-toggle v-model="viewMode" mandatory>
+                  <v-btn value="grid">
+                    <v-icon>mdi-grid</v-icon>
+                  </v-btn>
+                  <v-btn value="sequence">
+                    <v-icon>mdi-format-list-bulleted</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
               </v-col>
             </v-row>
 
-            <!-- Pagination Controls -->
-            <v-row justify="center" class="mt-4">
-              <v-pagination
-                v-if="pagination_count > limit"
-                v-model="page"
-                :length="Math.ceil(pagination_count / limit)"
-                @input="changePage"
-              ></v-pagination>
-            </v-row>
+            <!-- Dynamic Image Display -->
+            <div :class="['image-display', viewMode]">
+              <div v-for="(image, index) in favourites" 
+                   :key="index" 
+                   class="image-container">
+                <img :src="image.image.url" 
+                     alt="Favorite Image" 
+                     class="fav-img" />
+              </div>
+            </div>
           </v-container>
         </v-content>
       </v-app>

@@ -13,15 +13,15 @@
 # Dependency directories
 /vendor/
 
-# Config files (if they contain sensitive info)
-conf/app.conf
+# # Config files (if they contain sensitive info)
+# conf/app.conf
 
 # Logs and temporary files
 *.log
 *.tmp
 
-# Static files (if dynamically generated or unnecessary for the repo)
-static/img/
+# # Static files (if dynamically generated or unnecessary for the repo)
+# static/img/
 
 # Ignore VSCode settings (optional)
 .vscode/

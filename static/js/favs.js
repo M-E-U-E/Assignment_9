@@ -2,59 +2,48 @@ new Vue({
   el: '#app',
   vuetify: new Vuetify(),
   data: {
-    activeTab: 'favs',         // Indicates the current active tab
-    favourites: [],            // Array to store favorite images
-    limit: 12,                 // Number of images per page
-    page: 1,                   // Current page index (starts at 1)
-    pagination_count: 0,       // Total count of favorites for pagination
-    viewMode: 'gallery grid',  // Current view mode (grid or list)
+    favourites: [],
+    apiKey: '',
+    viewMode: 'grid', // Default view mode
   },
-  created() {
-    this.getFavourites(); // Fetch favorite images when the component is created
+  async created() {
+    await this.getApiKey();
+    await this.getFavourites();
   },
   methods: {
-    // Fetch favorite images dynamically
-    async getFavourites() {
+    async getApiKey() {
       try {
-        let query_params = {
-          limit: this.limit,   // Number of items per page
-          order: 'DESC',       // Order of results (newest first)
-          page: this.page - 1, // API expects zero-based page index
-        };
+        const response = await axios.get('/api/config/api_key');
+        this.apiKey = response.data.api_key;
+      } catch (err) {
+        console.error('Error fetching API key:', err.message);
+        alert('Failed to load API key. Some features may not work.');
+      }
+    },
 
-        // Make GET request to The Cat API
-        let response = await axios.get('https://api.thecatapi.com/v1/favourites', {
-          params: query_params,
+    async getFavourites() {
+      if (!this.apiKey) {
+        console.warn('API key is missing. Cannot fetch favorites.');
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://api.thecatapi.com/v1/favourites', {
           headers: {
-            'x-api-key': 'live_G9HhPFIdEQOKjegSsyNOQ8lRoWxFkzxttwXgu7F0gCFLhYVlX0F1cIVGMADW6rtg', // API key
+            'x-api-key': this.apiKey,
           },
         });
 
-        // Update favourites and pagination data
-        console.log('Fetched Favorites:', response.data);
         this.favourites = response.data;
-        this.pagination_count = response.headers['pagination-count']; // Total count of favorites
-
+        this.favourites.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       } catch (err) {
         console.error('Error fetching favorites:', err.message);
         alert('Failed to load favorites.');
       }
     },
 
-    // Change the view mode (grid or list)
-    setView(view) {
-      this.viewMode = view === 'grid' ? 'gallery grid' : 'gallery list';
-    },
-
-    // Navigate to different pages
     navigateTo(path) {
       window.location.href = path;
-    },
-
-    // Change the page for pagination
-    async changePage(newPage) {
-      this.page = newPage; // Update the current page
-      await this.getFavourites(); // Fetch new data for the updated page
     },
   },
 });
