@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breeds</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Linux+Libertine:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/breeds.css?v={{ .UnixTimestamp }}">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="/static/js/breeds.js?v=1.0"></script>
   </head>
   <body>
     <div id="app">
@@ -53,9 +53,9 @@
             <!-- Breed Card -->
             <v-row justify="center" class="mt-2">
               <v-col cols="12" md="6">
-                <v-card>
+                <v-card class="wiki-card">
                   <!-- Breed Carousel -->
-                  <v-carousel v-model="carouselIndex">
+                  <v-carousel v-model="carouselIndex" height="400">
                     <v-carousel-item
                       v-for="(image, i) in images"
                       :key="i"
@@ -63,16 +63,33 @@
                     ></v-carousel-item>
                   </v-carousel>
 
-                  <!-- Breed Information -->
-                  <v-card-title>
-                    <h3>{{ "{{ selectedBreed.name }}" }}</h3>
-                  </v-card-title>
-                  <v-card-text>
-                    <p>{{ "{{ selectedBreed.description }}" }}</p>
-                    <p><strong>Temperament:</strong> {{ "{{ selectedBreed.temperament }}" }}</p>
-                    <p><strong>Origin:</strong> {{ "{{ selectedBreed.origin }}" }}</p>
-                    <v-btn :href="selectedBreed.wikipedia_url" target="_blank" color="orange" flat>Wikipedia</v-btn>
-                  </v-card-text>
+                  <!-- Wikipedia-style Breed Information -->
+                  <div class="wiki-content">
+                    <div class="breed-title">
+                      {{ "{{ selectedBreed.name }}" }}
+                      <span class="breed-location">({{ "{{ selectedBreed.origin }}" }})</span>
+                      <span class="breed-id">{{ "{{ selectedBreed.id }}" }}</span>
+                    </div>
+                    
+                    <p class="breed-description">{{ "{{ selectedBreed.description }}" }}</p>
+                    
+                    <div class="breed-details">
+                      <p><strong>Temperament:</strong> {{ "{{ selectedBreed.temperament }}" }}</p>
+                    </div>
+
+                    <div class="source-tag">WIKIPEDIA</div>
+                    
+                    <v-btn 
+                      :href="selectedBreed.wikipedia_url" 
+                      target="_blank" 
+                      text
+                      color="blue darken-1"
+                      class="wiki-link mt-2"
+                    >
+                      <v-icon left small>mdi-open-in-new</v-icon>
+                      Read more on Wikipedia
+                    </v-btn>
+                  </div>
                 </v-card>
               </v-col>
             </v-row>
