@@ -98,9 +98,6 @@ Assignment_9/                          # Root project directory
 │
 ├── tests/                        # Unit and integration tests
 │   ├── default_test.go
-│   ├── breeds_test.go
-│   ├── favs_test.go
-│   └── voting_test.go
 │
 ├── views/                        # Template files
 │   ├── breeds.tpl
