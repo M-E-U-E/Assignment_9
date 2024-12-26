@@ -46,9 +46,9 @@ To clone this project to your local machine, follow these steps:
     bee run
     ```
 4. **Access Endpoints**
-    http://localhost:8080/voting
-    http://localhost:8080/breeds
-    http://localhost:8080/favs
+    - http://localhost:8080/voting
+    - http://localhost:8080/breeds
+    - http://localhost:8080/favs
 
 
 
