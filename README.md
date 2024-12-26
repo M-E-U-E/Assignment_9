@@ -115,12 +115,25 @@ Assignment_9/                          # Root project directory
 ```
 ## Technologies Used
 
-- Go (Golang): The main programming language for developing the application.
-- Beego Framework: A popular Go web framework, indicated by the directory structure (e.g., controllers, models, routers).
-- HTML Templates: For rendering views, as suggested by the .tpl files in the views directory.
-- CSS/JavaScript: For styling and interactivity, located in the static folder.
-- Go Testing Package: For unit and integration tests, as seen in the *_test.go files.
-- Beego ORM: If Beego is used, its built-in ORM is likely used for database interactions.
+- ![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)  
+  **Go (Golang)**: The main programming language for developing the application.
+
+- ![Beego](https://img.shields.io/badge/Beego-%23F15A24.svg?style=for-the-badge&logo=beego&logoColor=white)  
+  **Beego Framework**: A popular Go web framework, indicated by the directory structure (e.g., controllers, models, routers).
+
+- ![HTML](https://img.shields.io/badge/HTML5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)  
+  **HTML Templates**: For rendering views, as suggested by the `.tpl` files in the `views` directory.
+
+- ![CSS](https://img.shields.io/badge/CSS3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)  
+  ![JavaScript](https://img.shields.io/badge/JavaScript-%23F7DF1E.svg?style=for-the-badge&logo=javascript&logoColor=black)  
+  **CSS/JavaScript**: For styling and interactivity, located in the `static` folder.
+
+- ![Go Testing](https://img.shields.io/badge/Go%20Testing-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)  
+  **Go Testing Package**: For unit and integration tests, as seen in the `*_test.go` files.
+
+- ![Beego ORM](https://img.shields.io/badge/Beego%20ORM-%23F15A24.svg?style=for-the-badge&logo=beego&logoColor=white)  
+  **Beego ORM**: If Beego is used, its built-in ORM is likely used for database interactions.
+
 
   
 
