@@ -42,6 +42,7 @@ To clone this project to your local machine, follow these steps:
     ```
 3. **To Run the Application:**
     ```
+    go install github.com/beego/bee/v2@latest
     go mod tidy
     bee run
     ```
