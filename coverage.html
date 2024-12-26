@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>controllers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">cat_api/controllers/breeds.go (74.5%)</option>
+				
+				<option value="file1">cat_api/controllers/config_controller.go (80.0%)</option>
+				
+				<option value="file2">cat_api/controllers/default.go (100.0%)</option>
+				
+				<option value="file3">cat_api/controllers/favs.go (69.8%)</option>
+				
+				<option value="file4">cat_api/controllers/test_helpers.go (100.0%)</option>
+				
+				<option value="file5">cat_api/controllers/voting.go (71.7%)</option>
+				
+				<option value="file6">cat_api/main.go (37.5%)</option>
+				
+				<option value="file7">cat_api/routers/router.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package controllers
+
+import (
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "time"
+
+        "github.com/beego/beego/v2/server/web"
+)
+
+type BreedsController struct {
+        web.Controller
+}
+
+type Breed struct {
+        ID          string `json:"id"`
+        Name        string `json:"name"`
+        Origin      string `json:"origin"`
+        Description string `json:"description"`
+}
+
+func (c *BreedsController) Get() <span class="cov8" title="1">{
+        // Fetch the API key and base URL from the app configuration
+        apiKey, err := web.AppConfig.String("api_key")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error fetching API key from configuration:", err)
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API key from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">apiBaseURL, err := web.AppConfig.String("api_base_url")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error fetching API base URL from configuration:", err)
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API base URL from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        // Create a channel for API responses and errors
+        <span class="cov8" title="1">breedChan := make(chan []Breed)
+        errChan := make(chan error)
+
+        go func() </span><span class="cov8" title="1">{
+                // API URL to fetch breeds
+                url := apiBaseURL + "/breeds"
+                client := &amp;http.Client{}
+                req, err := http.NewRequest("GET", url, nil)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">req.Header.Add("x-api-key", apiKey)
+
+                resp, err := client.Do(req)
+                if err != nil </span><span class="cov8" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">defer resp.Body.Close()
+
+                body, err := ioutil.ReadAll(resp.Body)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">var breeds []Breed
+                if err := json.Unmarshal(body, &amp;breeds); err != nil </span><span class="cov8" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">breedChan &lt;- breeds</span>
+        }()
+
+        // Wait for the response or error
+        <span class="cov8" title="1">select </span>{
+        case breeds := &lt;-breedChan:<span class="cov8" title="1">
+                // Pass data to the template
+                c.Data["Breeds"] = breeds</span>
+        case err := &lt;-errChan:<span class="cov8" title="1">
+                fmt.Println("Error fetching breeds:", err)
+                c.Data["json"] = map[string]string{"error": "Failed to fetch breed data"}
+                c.ServeJSON()
+                return</span>
+        case &lt;-time.After(5 * time.Second):<span class="cov8" title="1"> // Timeout after 5 seconds
+                fmt.Println("Request timed out while fetching breed data")
+                c.Data["json"] = map[string]string{"error": "Request timed out"}
+                c.ServeJSON()
+                return</span>
+        }
+
+        <span class="cov8" title="1">c.TplName = "breeds.tpl"</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package controllers
+
+import (
+    "github.com/beego/beego/v2/server/web"
+)
+
+type ConfigController struct {
+    web.Controller
+}
+
+// GetAPIKey handles fetching the API key
+func (c *ConfigController) GetAPIKey() <span class="cov8" title="1">{
+    apiKey, err := web.AppConfig.String("api_key")
+    if err != nil </span><span class="cov0" title="0">{
+        c.Data["json"] = map[string]string{"error": "Failed to fetch API key"}
+    }</span> else<span class="cov8" title="1"> {
+        c.Data["json"] = map[string]string{"api_key": apiKey}
+    }</span>
+    <span class="cov8" title="1">c.ServeJSON()</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package controllers
+
+import (
+        "fmt"
+        beego "github.com/beego/beego/v2/server/web"
+)
+
+type MainController struct {
+        beego.Controller
+}
+
+func (c *MainController) Get() <span class="cov8" title="1">{
+        clientIP := c.Ctx.Input.IP()
+        fmt.Println(clientIP)
+        c.Data["ip"] = clientIP
+        c.TplName = "index.tpl"
+        c.Data["Website"] = "beego.vip"
+        c.Data["Email"] = "astaxie@gmail.com"
+        c.TplName = "index.tpl"
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package controllers
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "time"
+
+        "github.com/beego/beego/v2/server/web"
+)
+
+type FavsController struct {
+        web.Controller
+}
+
+type FavoriteCat struct {
+        ID    int    `json:"id"`
+        Image struct {
+                ID  string `json:"id"`
+                URL string `json:"url"`
+        } `json:"image"`
+}
+
+// Fetch favorites for display
+func (c *FavsController) Get() <span class="cov8" title="1">{
+        // Fetch the API key and base URL from the app configuration
+        apiKey, err := web.AppConfig.String("api_key")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["FavoriteImages"] = []string{} // Fallback to empty list
+                c.TplName = "favs.tpl"
+                fmt.Println("Error fetching API key from configuration:", err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">apiBaseURL, err := web.AppConfig.String("api_base_url")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["FavoriteImages"] = []string{}
+                c.TplName = "favs.tpl"
+                fmt.Println("Error fetching API base URL from configuration:", err)
+                return
+        }</span>
+
+        // Create a channel for API responses and errors
+        <span class="cov8" title="1">favChan := make(chan []FavoriteCat)
+        errChan := make(chan error)
+
+        go func() </span><span class="cov8" title="1">{
+                url := apiBaseURL + "/favourites"
+                client := &amp;http.Client{}
+                req, err := http.NewRequest("GET", url, nil)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">req.Header.Add("x-api-key", apiKey)
+
+                resp, err := client.Do(req)
+                if err != nil </span><span class="cov8" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">defer resp.Body.Close()
+
+                body, err := ioutil.ReadAll(resp.Body)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">var favorites []FavoriteCat
+                if err := json.Unmarshal(body, &amp;favorites); err != nil </span><span class="cov8" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">favChan &lt;- favorites</span>
+        }()
+
+        // Wait for the response or error
+        <span class="cov8" title="1">select </span>{
+        case favorites := &lt;-favChan:<span class="cov8" title="1">
+                // Extract image URLs
+                var favoriteImages []map[string]interface{}
+                for _, fav := range favorites </span><span class="cov8" title="1">{
+                        if fav.Image.URL != "" </span><span class="cov8" title="1">{
+                                favoriteImages = append(favoriteImages, map[string]interface{}{
+                                        "id":  fav.ID,
+                                        "url": fav.Image.URL,
+                                })
+                        }</span>
+                }
+
+                // Pass the data to the template
+                <span class="cov8" title="1">c.Data["FavoriteImages"] = favoriteImages</span>
+        case err := &lt;-errChan:<span class="cov8" title="1">
+                fmt.Println("Error fetching favorites:", err)
+                c.Data["FavoriteImages"] = []string{}</span>
+        case &lt;-time.After(5 * time.Second):<span class="cov8" title="1"> // Timeout after 5 seconds
+                fmt.Println("Request timed out while fetching favorites")
+                c.Data["FavoriteImages"] = []string{}</span>
+        }
+
+        <span class="cov8" title="1">c.TplName = "favs.tpl"</span>
+}
+
+// Add a new favorite
+func (c *FavsController) Post() <span class="cov8" title="1">{
+        // Fetch the API key and base URL from the app configuration
+        apiKey, err := web.AppConfig.String("api_key")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API key from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">apiBaseURL, err := web.AppConfig.String("api_base_url")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API base URL from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">url := apiBaseURL + "/favourites"
+
+        body, err := ioutil.ReadAll(c.Ctx.Request.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error reading request body:", err)
+                c.Data["json"] = map[string]string{"error": "Invalid request"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">var requestData map[string]string
+        if err := json.Unmarshal(body, &amp;requestData); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("Error parsing request data:", err)
+                c.Data["json"] = map[string]string{"error": "Invalid JSON"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">imageID, exists := requestData["image_id"]
+        if !exists </span><span class="cov0" title="0">{
+                c.Data["json"] = map[string]string{"error": "Missing image_id"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">payload := map[string]string{"image_id": imageID}
+        payloadJSON, _ := json.Marshal(payload)
+
+        req, err := http.NewRequest("POST", url, ioutil.NopCloser(bytes.NewReader(payloadJSON)))
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error creating request:", err)
+                c.Data["json"] = map[string]string{"error": "Failed to create request"}
+                c.ServeJSON()
+                return
+        }</span>
+        <span class="cov8" title="1">req.Header.Add("x-api-key", apiKey)
+        req.Header.Add("Content-Type", "application/json")
+
+        client := &amp;http.Client{}
+        resp, err := client.Do(req)
+        if err != nil </span><span class="cov8" title="1">{
+                fmt.Println("Error performing API request:", err)
+                c.Data["json"] = map[string]string{"error": "Failed to save favorite"}
+                c.ServeJSON()
+                return
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        respBody, _ := ioutil.ReadAll(resp.Body)
+        c.Data["json"] = json.RawMessage(respBody)
+        c.ServeJSON()</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package controllers
+
+import (
+    "net/http"
+    "net/http/httptest"
+
+    "github.com/beego/beego/v2/server/web/context"
+        
+)
+
+// Shared setupTestContext function
+func setupTestContext(req *http.Request) (*httptest.ResponseRecorder, *context.Context) <span class="cov8" title="1">{
+    w := httptest.NewRecorder()
+    ctx := &amp;context.Context{
+        Input:  &amp;context.BeegoInput{Context: &amp;context.Context{}},
+        Output: &amp;context.BeegoOutput{Context: &amp;context.Context{}},
+    }
+    ctx.Reset(w, req)
+    return w, ctx
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package controllers
+
+import (
+        "encoding/json"
+        "io/ioutil"
+        "net/http"
+        "time"
+
+        "github.com/beego/beego/v2/server/web"
+)
+
+type VotingController struct {
+        web.Controller
+}
+
+type VotingCat struct {
+        ID  string `json:"id"`
+        URL string `json:"url"`
+}
+
+// Fetches random cat images and renders the voting page
+func (c *VotingController) Get() <span class="cov8" title="1">{
+        // Fetch the API key and base URL from the app configuration
+        apiKey, err := web.AppConfig.String("api_key")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API key from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        <span class="cov8" title="1">apiBaseURL, err := web.AppConfig.String("api_base_url")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Data["json"] = map[string]string{"error": "Failed to fetch API base URL from configuration"}
+                c.ServeJSON()
+                return
+        }</span>
+
+        // Create a channel to receive the API response
+        <span class="cov8" title="1">catChan := make(chan []VotingCat)
+        errChan := make(chan error)
+
+        // Fetch random cat image in a separate goroutine
+        go func() </span><span class="cov8" title="1">{
+                url := apiBaseURL + "/images/search?limit=1"
+                client := &amp;http.Client{}
+                req, err := http.NewRequest("GET", url, nil)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">req.Header.Add("x-api-key", apiKey)
+
+                resp, err := client.Do(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov8" title="1">defer resp.Body.Close()
+
+                body, err := ioutil.ReadAll(resp.Body)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">var cats []VotingCat
+                if err := json.Unmarshal(body, &amp;cats); err != nil </span><span class="cov8" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+
+                <span class="cov8" title="1">catChan &lt;- cats</span>
+        }()
+
+        // Wait for the response or error
+        <span class="cov8" title="1">select </span>{
+        case cats := &lt;-catChan:<span class="cov8" title="1">
+                // Check if any cat data was returned
+                if len(cats) &gt; 0 </span><span class="cov8" title="1">{
+                        c.Data["CatImageURL"] = cats[0].URL
+                }</span> else<span class="cov0" title="0"> {
+                        c.Data["CatImageURL"] = "/static/images/cat-placeholder.jpg" // Fallback image
+                }</span>
+        case err := &lt;-errChan:<span class="cov8" title="1">
+                c.Data["json"] = map[string]string{"error": "Failed to fetch data: " + err.Error()}
+                c.ServeJSON()
+                return</span>
+        case &lt;-time.After(5 * time.Second):<span class="cov8" title="1"> 
+                c.Data["json"] = map[string]string{"error": "Request timed out"}
+                c.ServeJSON()
+                return</span>
+        }
+
+        // Render the voting page
+        <span class="cov8" title="1">c.Data["UnixTimestamp"] = time.Now().Unix()
+        c.TplName = "voting.tpl"</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package main
+
+import (
+        _ "cat_api/routers"
+        "github.com/beego/beego/v2/server/web"
+        "github.com/beego/beego/v2/server/web/context"
+        "fmt"
+)
+func setupApplication() <span class="cov8" title="1">{
+    web.SetStaticPath("/static", "static")
+    web.InsertFilter("/static/*", web.BeforeStatic, func(ctx *context.Context) </span><span class="cov8" title="1">{
+        ctx.Output.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+        ctx.Output.Header("Pragma", "no-cache")
+        ctx.Output.Header("Expires", "0")
+    }</span>)
+    <span class="cov8" title="1">web.AddFuncMap("fav", func(input string) string </span><span class="cov0" title="0">{
+        return fmt.Sprintf("Favorite ID: %s", input)
+    }</span>)
+}
+func main() <span class="cov0" title="0">{
+        // Routers for the application
+        
+
+        web.SetStaticPath("/static", "static")
+        web.InsertFilter("/static/*", web.BeforeStatic, func(ctx *context.Context) </span><span class="cov0" title="0">{
+                ctx.Output.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+                ctx.Output.Header("Pragma", "no-cache")
+                ctx.Output.Header("Expires", "0")
+        }</span>)
+        <span class="cov0" title="0">web.AddFuncMap("fav", func(input string) string </span><span class="cov0" title="0">{
+                return fmt.Sprintf("Favorite ID: %s", input)
+        }</span>)
+        <span class="cov0" title="0">setupApplication()
+        web.Run()</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package routers
+
+import (
+        "cat_api/controllers"
+        beego "github.com/beego/beego/v2/server/web"
+        "github.com/beego/beego/v2/server/web/filter/cors"
+)
+
+func init() <span class="cov8" title="1">{
+        // Enable CORS
+        beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&amp;cors.Options{
+                AllowAllOrigins:  true,
+                AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+                AllowHeaders:     []string{"Origin", "x-api-key", "Content-Type", "Accept"},
+                ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+                AllowCredentials: true,
+        }))
+
+        // Define routes
+        beego.Router("/voting", &amp;controllers.VotingController{})
+        beego.Router("/breeds", &amp;controllers.BreedsController{})
+        beego.Router("/favs", &amp;controllers.FavsController{})
+        beego.Router("/api/favorites", &amp;controllers.FavsController{}, "get:Get")
+        beego.Router("/api/favorites", &amp;controllers.FavsController{}, "post:Post")
+        beego.Router("/", &amp;controllers.MainController{})
+        beego.Router("/api/config/api_key", &amp;controllers.ConfigController{}, "get:GetAPIKey")
+
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

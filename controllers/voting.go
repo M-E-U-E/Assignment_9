@@ -85,7 +85,7 @@ func (c *VotingController) Get() {
 		c.Data["json"] = map[string]string{"error": "Failed to fetch data: " + err.Error()}
 		c.ServeJSON()
 		return
-	case <-time.After(5 * time.Second): // Timeout after 5 seconds
+	case <-time.After(5 * time.Second): 
 		c.Data["json"] = map[string]string{"error": "Request timed out"}
 		c.ServeJSON()
 		return

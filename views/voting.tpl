@@ -43,18 +43,45 @@
                   <v-img :src="catImage" height="400px"></v-img>
 
                   <!-- Action Buttons -->
-                  <v-card-actions>
-                    <v-btn icon @click="addToFavorites" class="fav-btn">
-                        <v-icon color="red">mdi-heart</v-icon>
+                  <v-card-actions class="action-buttons">
+                  <div class="button-container">
+                    <v-btn
+                      icon
+                      @click="addToFavorites"
+                      class="action-btn fav-btn"
+                      flat
+                    >
+                      <v-icon size="24" color="red">mdi-heart</v-icon>
                     </v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn icon @click="fetchCatImage" class="upvote-btn">
-                      <v-icon color="green">mdi-thumb-up</v-icon>
+                    <span class="button-label">Love it</span>
+                  </div>
+                  
+                  <v-spacer></v-spacer>
+                  
+                  <div class="button-container">
+                    <v-btn
+                      icon
+                      @click="fetchCatImage"
+                      class="action-btn upvote-btn"
+                      flat
+                    >
+                      <v-icon size="24" color="green">mdi-thumb-up</v-icon>
                     </v-btn>
-                    <v-btn icon @click="fetchCatImage" class="downvote-btn">
-                      <v-icon color="blue">mdi-thumb-down</v-icon>
+                    <span class="button-label">Upvote</span>
+                  </div>
+                  
+                  <div class="button-container">
+                    <v-btn
+                      icon
+                      @click="fetchCatImage"
+                      class="action-btn downvote-btn"
+                      flat
+                    >
+                      <v-icon size="24" color="blue">mdi-thumb-down</v-icon>
                     </v-btn>
-                  </v-card-actions>
+                    <span class="button-label">Downvote</span>
+                  </div>
+                </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>
